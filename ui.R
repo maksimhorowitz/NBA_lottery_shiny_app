@@ -35,5 +35,7 @@ shinyUI(pageWithSidebar(
  # )),
   
 
-  mainPanel( tableOutput("odds_vector"))
+  mainPanel( #verbatimTextOutput("names"),
+             tableOutput("raw_odds")
+             )
 ))

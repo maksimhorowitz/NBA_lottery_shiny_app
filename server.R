@@ -31,16 +31,33 @@ shinyServer(function(input, output) {
       })
     })
   
-  output$odds_vector <- reactive({
-    
+  values <- reactiveValues(df_odds = NULL)
+  
+  odds_first <- reactive({
+
   odds_vector_create <- names(input)[str_which(names(input), "seed[0-9]{1,2}")]
   #odd_values_seed <- sapply(odds_vector_create, get)
-  
-  odd_values_seed <- sapply(odds_vector_create, FUN = function(x) input$x)
+
+  odd_values_seed <- lapply(odds_vector_create, FUN = function(x) input[[x]]) %>% unlist
+
+  names(odd_values_seed) <- odds_vector_create
   
   # Output vector for now.
-  data.frame(Prob_1 = odd_values_seed)
-  
+  list(odds = odd_values_seed, names = odds_vector_create)
+
   })
+
+  output$raw_odds <- renderTable( {
+    data.frame(Seed = names(odds_first()$odds),
+       Prob_1 = odds_first()$odds ) %>%
+      mutate(Seed_Num = str_extract(Seed, "[0-9]{1,2}") %>% as.numeric()) %>%
+      arrange(Seed_Num) %>%
+      select(Seed_Num, Prob_1) %>%
+      rename("Seed" = "Seed_Num") %>%
+      mutate(Num_Combs = 1000*Prob_1)
+    
+    })
+  
+  output$names <- reactive({odds_first()$names})
   
 })
